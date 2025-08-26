@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+<div class="row">
+    <div class="col-12">
+        <div class="card chat-container">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Chat with <%= typeof isAdmin !== 'undefined' && isAdmin ? customer.username : 'Admin' %></h5>
+                <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                    <a href="/admin" class="btn btn-sm btn-secondary">Back to Dashboard</a>
+                <% } %>
+            </div>
+            <div class="card-body messages-container" id="messages">
+                <!-- Messages will be loaded here via Socket.IO -->
+            </div>
+            <div class="card-footer">
+                <form id="message-form" class="d-flex align-items-center">
+                    <div class="image-upload-wrapper me-2">
+                        <label for="image-input" class="btn btn-outline-secondary mb-0" title="Upload image">
+                            <i class="bi bi-image"></i>
+                        </label>
+                        <input type="file" id="image-input" accept="image/*" style="display: none;">
+                    </div>
+                    <input type="text" class="form-control me-2" id="message-input" placeholder="Type your message..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image modal -->
+<div id="image-modal" class="image-modal">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modal-image">
+    <div id="image-caption"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/chat.js"></script>
+<script>
+    // Pass data to the frontend
+    const customerId = '<%= customer._id %>';
+    const adminId = '<%= admin._id %>';
+    const roomId = '<%= roomId %>';
+    const isAdmin = <%= typeof isAdmin !== 'undefined' ? isAdmin : false %>;
+    
+    // Initialize chat
+    initializeChat(customerId, adminId, roomId, isAdmin);
+</script>
+<%- include('partials/footer') %>

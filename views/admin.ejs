@@ -1,0 +1,190 @@
+<%- include('partials/header') %>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3>Admin Dashboard</h3>
+                <span class="badge bg-primary">Total Customers: <%= customers.length %></span>
+            </div>
+            <div class="card-body">
+                <% if (customers.length > 0) { %>
+                    <div class="list-group">
+                        <% customers.forEach(customer => { %>
+                            <div class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="d-flex align-items-center">
+                                        <h5 class="mb-1"><%= customer.username %></h5>
+                                        <% if (customer.unreadCount > 0) { %>
+                                            <span class="badge bg-danger ms-2" id="unread-badge-<%= customer._id %>">
+                                                <%= customer.unreadCount %> unread
+                                            </span>
+                                        <% } %>
+                                    </div>
+                                    <small class="text-muted">Joined: <%= new Date(customer.createdAt).toLocaleDateString() %></small>
+                                    <% if (customer.lastMessage) { %>
+                                        <div class="mt-2">
+                                            <small class="d-block text-truncate" style="max-width: 400px;">
+                                                <strong>
+                                                    <%= customer.lastMessage.sender.username === customer.username ? customer.username : 'You' %>:
+                                                </strong>
+                                                <% if (customer.lastMessage.content === 'Image') { %>
+                                                    <i class="bi bi-image"></i> Image
+                                                <% } else { %>
+                                                    <%= customer.lastMessage.content %>
+                                                <% } %>
+                                            </small>
+                                            <small class="text-muted">
+                                                <%= new Date(customer.lastMessage.timestamp).toLocaleString() %>
+                                            </small>
+                                        </div>
+                                    <% } else { %>
+                                        <div class="mt-2">
+                                            <small class="text-muted">No messages yet</small>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="user-actions">
+                                    <a href="/admin/chat/<%= customer._id %>" class="btn btn-primary btn-sm me-1">
+                                        <i class="bi bi-chat-dots"></i> Chat
+                                    </a>
+                                    <% if (customer.unreadCount > 0) { %>
+                                        <button class="btn btn-success btn-sm me-1 mark-read-btn" 
+                                                data-user-id="<%= customer._id %>" 
+                                                title="Mark as read">
+                                            <i class="bi bi-check2-all"></i>
+                                        </button>
+                                    <% } %>
+                                    <button class="btn btn-danger btn-sm delete-user-btn" 
+                                            data-user-id="<%= customer._id %>" 
+                                            data-username="<%= customer.username %>">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <p class="text-center">No customers yet.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Handle user deletion
+    document.querySelectorAll('.delete-user-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const username = this.dataset.username;
+            
+            if (confirm(`Are you sure you want to delete user "${username}" and all their messages?`)) {
+                fetch(`/admin/delete-user/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the user');
+                });
+            }
+        });
+    });
+
+    // Handle mark as read
+    document.querySelectorAll('.mark-read-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            
+            fetch(`/admin/mark-as-read/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the unread badge
+                    const unreadBadge = document.getElementById(`unread-badge-${userId}`);
+                    if (unreadBadge) {
+                        unreadBadge.remove();
+                    }
+                    
+                    // Remove the mark as read button
+                    this.remove();
+                    
+                    showNotification('Messages marked as read', 'success');
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while marking messages as read', 'error');
+            });
+        });
+    });
+
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : 'success'} alert-dismissible fade show`;
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Add to page
+        const container = document.querySelector('.container');
+        container.insertBefore(notification, container.firstChild);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+</script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // Connect to Socket.IO for real-time updates
+    const socket = io();
+    
+    // Listen for new message notifications
+    socket.on('admin-notification', (data) => {
+        // Refresh the page to show updated message counts
+        location.reload();
+    });
+    
+    // Optional: Alternatively, you could update just the specific user's badge
+    // without refreshing the whole page
+    socket.on('admin-notification', (data) => {
+        const unreadBadge = document.getElementById(`unread-badge-${data.customerId}`);
+        if (unreadBadge) {
+            const currentCount = parseInt(unreadBadge.textContent) || 0;
+            unreadBadge.textContent = `${currentCount + 1} unread`;
+        } else {
+            // Create a new badge if it doesn't exist
+            const userElement = document.querySelector(`[data-user-id="${data.customerId}"]`);
+            if (userElement) {
+                const badge = document.createElement('span');
+                badge.className = 'badge bg-danger ms-2';
+                badge.id = `unread-badge-${data.customerId}`;
+                badge.textContent = '1 unread';
+                userElement.querySelector('h5').appendChild(badge);
+            }
+        }
+    });
+</script>
+<%- include('partials/footer') %>

@@ -1,0 +1,228 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.chat-container {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.message {
+    max-width: 80%;
+    margin-bottom: 1rem;
+    clear: both;
+}
+
+.message.customer {
+    float: left;
+    background-color: #e9ecef;
+    border-radius: 1rem 1rem 1rem 0;
+}
+
+.message.admin {
+    float: right;
+    background-color: #007bff;
+    color: white;
+    border-radius: 1rem 1rem 0 1rem;
+}
+
+.message-content {
+    padding: 0.5rem 1rem;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.7;
+    margin-top: 0.2rem;
+}
+
+/* Message actions */
+.message-actions {
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    padding: 0 1rem 0.5rem;
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+.message-actions .btn {
+    margin-right: 0.25rem;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
+}
+
+/* Badges */
+.edited-badge {
+    font-size: 0.7rem;
+    opacity: 0.7;
+}
+
+.read-badge {
+    font-size: 0.7rem;
+    color: #28a745;
+}
+
+/* Image messages */
+.chat-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.chat-image:hover {
+    transform: scale(1.02);
+}
+
+/* Image upload button */
+.image-upload-wrapper {
+    position: relative;
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Modal for enlarged images */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.modal-content {
+    display: block;
+    margin: 0 auto;
+    max-width: 90%;
+    max-height: 80%;
+}
+
+#image-caption {
+    margin: auto;
+    display: block;
+    width: 80%;
+    max-width: 700px;
+    text-align: center;
+    color: #ccc;
+    padding: 10px 0;
+    height: 150px;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Notification alerts */
+.alert {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .chat-container {
+        height: 90vh;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .alert {
+        min-width: 250px;
+        right: 10px;
+    }
+}
+/* Admin Dashboard Styles */
+.user-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.user-actions .btn {
+    white-space: nowrap;
+}
+
+.list-group-item {
+    transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.list-group-item.unread {
+    background-color: #f8f9fa;
+    border-left: 4px solid #0d6efd;
+}
+
+/* Notification badges */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Message preview */
+.text-truncate {
+    max-width: 400px;
+}
+
+/* Icons */
+.bi {
+    font-size: 1.1em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .user-actions {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .user-actions .btn {
+        width: 100%;
+    }
+    
+    .text-truncate {
+        max-width: 200px;
+    }
+    
+    .ms-2.me-auto {
+        margin-right: 0 !important;
+    }
+}
